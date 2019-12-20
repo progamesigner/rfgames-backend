@@ -1,6 +1,7 @@
 use lazy_static::lazy_static;
+use lib::{process, Form, IntoPayload};
+use now_lambda::{error::NowError, Body, IntoResponse, Request};
 use regex::Regex;
-use rfgames_api_backend::{server, FromForm};
 use serde::{Deserialize, Deserializer};
 use serde_json::{json, Value};
 
@@ -12,23 +13,25 @@ struct ContactForm {
     message: String,
 }
 
-impl FromForm for ContactForm {
-    fn into_body(data: &Self, id: &str) -> Value {
+impl Form for ContactForm {
+    fn prefix() -> String {
+        "CM".into()
+    }
+}
+
+impl IntoPayload<Value> for ContactForm {
+    fn into(self, id: &str) -> Value {
         json!({
             "embeds": [{
                 "title": format!(
                     "Message {} from \"{}\" ({})",
                     id,
-                    data.name,
-                    data.email
+                    self.name,
+                    self.email
                 ),
-                "description": data.message
+                "description": self.message
             }]
         })
-    }
-
-    fn prefix() -> String {
-        "CM".into()
     }
 }
 
@@ -51,8 +54,14 @@ where
     }
 }
 
-fn main() {
-    env_logger::init();
+pub fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
+    let body = match request.body() {
+        Body::Text(body) => body,
+        _ => return Err(NowError::new("Unknown payload")),
+    };
 
-    server::start::<ContactForm>();
+    match process::<ContactForm>(body) {
+        Ok(response) => Ok(response),
+        Err(error) => return Err(NowError::new(error.into())),
+    }
 }

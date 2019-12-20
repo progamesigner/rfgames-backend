@@ -1,7 +1,8 @@
 use lazy_static::lazy_static;
+use lib::{process, Form, IntoPayload};
+use now_lambda::{error::NowError, Body, IntoResponse, Request};
 use regex::Regex;
-use rfgames_api_backend::{server, FromForm};
-use serde::{self, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer};
 use serde_json::{json, Value};
 use std::fmt::{Display, Formatter, Result as FMTResult};
 
@@ -23,7 +24,7 @@ enum Profession {
 }
 
 #[derive(Deserialize)]
-struct ApplicationForm {
+struct ApplyForm {
     #[serde(deserialize_with = "arenanet_account_deserializer")]
     account: String,
     #[serde(deserialize_with = "discord_account_deserializer")]
@@ -36,6 +37,46 @@ struct ApplicationForm {
     main: Profession,
     alt: Profession,
     message: String,
+}
+
+impl Form for ApplyForm {
+    fn prefix() -> String {
+        "AP".into()
+    }
+}
+
+impl IntoPayload<Value> for ApplyForm {
+    fn into(self, id: &str) -> Value {
+        json!({
+            "embeds": [{
+                "title": format!(
+                    "Application {} from \"{}\" ({})",
+                    id,
+                    self.account,
+                    self.discord
+                ),
+                "description": format!("
+Is age 18 or older: {}
+Does understand visions and goals: {}
+Does run with us in weekend: {}
+Does have a working microphone: {}
+Does have a willing to command: {}
+Professions: {} & {}
+**Messages**
+```{}```
+",
+                    self.age,
+                    self.goals,
+                    self.times,
+                    self.microphone,
+                    self.commands,
+                    self.main,
+                    self.alt,
+                    self.message
+                )
+            }]
+        })
+    }
 }
 
 impl Display for Boolean {
@@ -66,44 +107,6 @@ impl Display for Profession {
             },
             formatter,
         )
-    }
-}
-
-impl FromForm for ApplicationForm {
-    fn into_body(data: &Self, id: &str) -> Value {
-        json!({
-            "embeds": [{
-                "title": format!(
-                    "Application {} from \"{}\" ({})",
-                    id,
-                    data.account,
-                    data.discord
-                ),
-                "description": format!("
-Is age 18 or older: {}
-Does understand visions and goals: {}
-Does run with us in weekend: {}
-Does have a working microphone: {}
-Does have a willing to command: {}
-Professions: {} & {}
-**Messages**
-```{}```
-",
-                    data.age,
-                    data.goals,
-                    data.times,
-                    data.microphone,
-                    data.commands,
-                    data.main,
-                    data.alt,
-                    data.message
-                )
-            }]
-        })
-    }
-
-    fn prefix() -> String {
-        "AP".into()
     }
 }
 
@@ -141,8 +144,14 @@ where
     }
 }
 
-fn main() {
-    env_logger::init();
+pub fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
+    let body = match request.body() {
+        Body::Text(body) => body,
+        _ => return Err(NowError::new("Unknown payload")),
+    };
 
-    server::start::<ApplicationForm>();
+    match process::<ApplyForm>(body) {
+        Ok(response) => Ok(response),
+        Err(error) => return Err(NowError::new(error.into())),
+    }
 }
