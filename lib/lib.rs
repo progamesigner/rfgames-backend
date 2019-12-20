@@ -10,3 +10,7 @@ pub trait Form {
 pub trait IntoPayload<T> {
     fn into(self, id: &str) -> T;
 }
+
+pub trait Webhook {
+    fn webhook() -> String;
+}

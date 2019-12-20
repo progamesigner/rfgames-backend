@@ -1,24 +1,24 @@
-use crate::{id, Form, IntoPayload};
-
-use serde_json::Value;
-use serde::Deserialize;
-use std::{env, error::Error, fmt};
-use ureq;
+use {
+    crate::{id, Form, IntoPayload, Webhook},
+    serde_json::Value,
+    serde::Deserialize,
+    std::{error::Error, fmt},
+    ureq
+};
 
 #[derive(Debug)]
 pub struct ProcessError<'a>(&'a str);
 
 pub fn process<'de, F>(payload: &'de str) -> Result<(), ProcessError<'de>>
 where
-    F: Deserialize<'de> + Form + IntoPayload<Value>,
+    F: Deserialize<'de> + Form + IntoPayload<Value> + Webhook,
 {
     let json = match serde_json::from_str::<F>(payload) {
         Ok(json) => json,
         Err(_) => return Err(ProcessError("Error while parsing request")),
     };
 
-    let webhook = env::var("FORM_WEBHOOK_URL")
-        .expect("Required environment varialbe \"FORM_WEBHOOK_URL\" not present.");
+    let webhook = F::webhook();
 
     let response = ureq::post(&webhook)
         .set("Content-Type", "application/json")

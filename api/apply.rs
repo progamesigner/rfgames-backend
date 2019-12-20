@@ -1,10 +1,15 @@
-use lazy_static::lazy_static;
-use lib::{process, Form, IntoPayload};
-use now_lambda::{error::NowError, Body, IntoResponse, Request};
-use regex::Regex;
-use serde::{Deserialize, Deserializer};
-use serde_json::{json, Value};
-use std::fmt::{Display, Formatter, Result as FMTResult};
+use {
+    lazy_static::lazy_static,
+    lib::{process, Form, IntoPayload, Webhook},
+    now_lambda::{error::NowError, Body, IntoResponse, Request},
+    regex::Regex,
+    serde::{Deserialize, Deserializer},
+    serde_json::{json, Value},
+    std::{
+        env,
+        fmt::{Display, Formatter, Result as FMTResult},
+    },
+};
 
 #[derive(Deserialize)]
 struct Boolean(bool);
@@ -76,6 +81,13 @@ Professions: {} & {}
                 )
             }]
         })
+    }
+}
+
+impl Webhook for ApplyForm {
+    fn webhook() -> String {
+        env::var("APPLY_WEBHOOK_URL")
+            .expect("Required environment varialbe \"APPLY_WEBHOOK_URL\" not present.")
     }
 }
 
