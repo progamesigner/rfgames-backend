@@ -1,4 +1,4 @@
-FROM rust:1.39
+FROM rust:1.39 AS builder
 
 WORKDIR /build
 
@@ -17,4 +17,22 @@ RUN mkdir src \
 COPY src/ ./src/
 
 RUN touch src/*.rs && \
-    PATH=$PWD/bin:$PATH cargo install --target x86_64-unknown-linux-musl --root $PWD --path $PWD
+    export PATH=$PWD/bin:$PATH && \
+    cargo install \
+        --target x86_64-unknown-linux-musl \
+        --root $PWD \
+        --path $PWD
+
+FROM alpine
+
+ARG BUILD_TARGET
+
+ENV RUST_LOG=actix_web=info
+ENV SERVER_LISTEN_ADDR=0.0.0.0
+ENV SERVER_LISTEN_PORT=80
+
+COPY --from=builder /build/bin/$BUILD_TARGET /usr/local/bin/server
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/local/bin/server"]
