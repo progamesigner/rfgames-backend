@@ -1,11 +1,11 @@
 use {
+    env_logger,
     lazy_static::lazy_static,
-    lib::{process, Form, IntoPayload, Webhook},
-    now_lambda::{error::NowError, Body, IntoResponse, Request},
     regex::Regex,
+    rfgames_api_backend::{serve, Form},
     serde::{Deserialize, Deserializer},
     serde_json::{json, Value},
-    std::env,
+    std::{env, io},
 };
 
 #[derive(Deserialize)]
@@ -20,10 +20,8 @@ impl Form for ContactForm {
     fn prefix() -> String {
         "CM".into()
     }
-}
 
-impl IntoPayload<Value> for ContactForm {
-    fn into(self, id: &str) -> Value {
+    fn into_payload(&self, id: &str) -> Value {
         json!({
             "embeds": [{
                 "title": format!(
@@ -36,9 +34,7 @@ impl IntoPayload<Value> for ContactForm {
             }]
         })
     }
-}
 
-impl Webhook for ContactForm {
     fn webhook() -> String {
         env::var("CONTACT_WEBHOOK_URL")
             .expect("Required environment varialbe \"CONTACT_WEBHOOK_URL\" not present.")
@@ -64,14 +60,8 @@ where
     }
 }
 
-pub fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
-    let body = match request.body() {
-        Body::Text(body) => body,
-        _ => return Err(NowError::new("Unknown payload")),
-    };
+fn main() -> io::Result<()> {
+    env_logger::init();
 
-    match process::<ContactForm>(body) {
-        Ok(response) => Ok(response),
-        Err(error) => return Err(NowError::new(error.into())),
-    }
+    serve::<ContactForm>()
 }

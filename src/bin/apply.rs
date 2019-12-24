@@ -1,14 +1,11 @@
 use {
+    env_logger,
     lazy_static::lazy_static,
-    lib::{process, Form, IntoPayload, Webhook},
-    now_lambda::{error::NowError, Body, IntoResponse, Request},
     regex::Regex,
+    rfgames_api_backend::{serve, Form},
     serde::{Deserialize, Deserializer},
     serde_json::{json, Value},
-    std::{
-        env,
-        fmt::{Display, Formatter, Result as FMTResult},
-    },
+    std::{env, fmt, io},
 };
 
 #[derive(Deserialize)]
@@ -48,10 +45,8 @@ impl Form for ApplyForm {
     fn prefix() -> String {
         "AP".into()
     }
-}
 
-impl IntoPayload<Value> for ApplyForm {
-    fn into(self, id: &str) -> Value {
+    fn into_payload(&self, id: &str) -> Value {
         json!({
             "embeds": [{
                 "title": format!(
@@ -82,18 +77,16 @@ Professions: {} & {}
             }]
         })
     }
-}
 
-impl Webhook for ApplyForm {
     fn webhook() -> String {
         env::var("APPLY_WEBHOOK_URL")
             .expect("Required environment varialbe \"APPLY_WEBHOOK_URL\" not present.")
     }
 }
 
-impl Display for Boolean {
-    fn fmt(&self, formatter: &mut Formatter) -> FMTResult {
-        Display::fmt(
+impl fmt::Display for Boolean {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(
             match self.0 {
                 true => "Yes",
                 false => "No",
@@ -103,9 +96,9 @@ impl Display for Boolean {
     }
 }
 
-impl Display for Profession {
-    fn fmt(&self, formatter: &mut Formatter) -> FMTResult {
-        Display::fmt(
+impl fmt::Display for Profession {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Display::fmt(
             match self {
                 Profession::Warrior => "Warrior / Berserker / Spellbreaker",
                 Profession::Guardian => "Guardian / Dragonhunter / Firebrand",
@@ -156,14 +149,8 @@ where
     }
 }
 
-pub fn handler(request: Request) -> Result<impl IntoResponse, NowError> {
-    let body = match request.body() {
-        Body::Text(body) => body,
-        _ => return Err(NowError::new("Unknown payload")),
-    };
+fn main() -> io::Result<()> {
+    env_logger::init();
 
-    match process::<ApplyForm>(body) {
-        Ok(response) => Ok(response),
-        Err(error) => return Err(NowError::new(error.into())),
-    }
+    serve::<ApplyForm>()
 }

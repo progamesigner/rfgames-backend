@@ -1,7 +1,9 @@
-use chrono::{offset::TimeZone, Datelike, Utc};
-use lazy_static::lazy_static;
-use rand::random;
-use std::convert::TryInto;
+use {
+    chrono::{offset::TimeZone, Datelike, Utc},
+    lazy_static::lazy_static,
+    rand::random,
+    std::convert::TryInto,
+};
 
 ///
 /// Get next ID for form
