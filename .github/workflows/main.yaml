@@ -1,0 +1,52 @@
+name: Build and publish to DockerHub
+
+on:
+  push:
+    branches:
+    - master
+  release:
+    types:
+    - published
+
+jobs:
+  build:
+    name: Publish to DockerHub
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Publish "apply-api-server" to DockerHub (latest)
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      with:
+        name: progamesigner/rfgames-apply-api-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        extra_build_params: --build-arg BUILD_TARGET=apply
+        snapshot: true
+      if: "!contains(github.ref, 'refs/tags/v')"
+    - name: Publish "apply-api-server" to DockerHub
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      with:
+        name: progamesigner/rfgames-apply-api-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        extra_build_params: --build-arg BUILD_TARGET=apply
+        tagging: true
+      if: "contains(github.ref, 'refs/tags/v')"
+    - name: Publish "contact-api-server" to DockerHub (latest)
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      with:
+        name: progamesigner/rfgames-contact-api-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        extra_build_params: --build-arg BUILD_TARGET=contact
+        snapshot: true
+      if: "!contains(github.ref, 'refs/tags/v')"
+    - name: Publish "contact-api-server" to DockerHub
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      with:
+        name: progamesigner/rfgames-contact-api-server
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        extra_build_params: --build-arg BUILD_TARGET=contact
+        tagging: true
+      if: "contains(github.ref, 'refs/tags/v')"
