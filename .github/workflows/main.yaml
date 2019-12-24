@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Publish "apply-api-server" to DockerHub (latest)
-      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.2
       with:
         name: progamesigner/rfgames-apply-api-server
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -23,7 +23,7 @@ jobs:
         extra_build_params: --build-arg BUILD_TARGET=apply
       if: "!contains(github.ref, 'refs/tags/v')"
     - name: Publish "apply-api-server" to DockerHub
-      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.2
       with:
         name: progamesigner/rfgames-apply-api-server
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -32,7 +32,7 @@ jobs:
         tagging: true
       if: "contains(github.ref, 'refs/tags/v')"
     - name: Publish "contact-api-server" to DockerHub (latest)
-      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.2
       with:
         name: progamesigner/rfgames-contact-api-server
         username: ${{ secrets.DOCKER_USERNAME }}
@@ -40,7 +40,7 @@ jobs:
         extra_build_params: --build-arg BUILD_TARGET=contact
       if: "!contains(github.ref, 'refs/tags/v')"
     - name: Publish "contact-api-server" to DockerHub
-      uses: HurricanKai/Publish-Docker-Github-Action@1.12.1
+      uses: HurricanKai/Publish-Docker-Github-Action@1.12.2
       with:
         name: progamesigner/rfgames-contact-api-server
         username: ${{ secrets.DOCKER_USERNAME }}
