@@ -29,10 +29,12 @@ ARG BUILD_TARGET
 
 ENV RUST_LOG=actix_web=info
 ENV SERVER_LISTEN_ADDR=0.0.0.0
-ENV SERVER_LISTEN_PORT=80
+ENV SERVER_LISTEN_PORT=8080
+
+USER nobody
 
 COPY --from=builder /build/bin/$BUILD_TARGET /usr/local/bin/server
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/server"]
