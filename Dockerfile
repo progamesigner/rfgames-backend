@@ -23,18 +23,23 @@ RUN touch src/*.rs && \
         --root $PWD \
         --path $PWD
 
-FROM alpine
+# -----------------------------------------------------------------------------
+
+FROM scratch
 
 ARG BUILD_TARGET
+
+COPY --from=builder /etc/passwd /etc/group /etc/
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+COPY --from=builder --chown=nobody:nogroup /build/bin/$BUILD_TARGET /bin/server
+
+USER nobody
 
 ENV RUST_LOG=actix_web=info
 ENV SERVER_LISTEN_ADDR=0.0.0.0
 ENV SERVER_LISTEN_PORT=8080
 
-USER nobody
-
-COPY --from=builder /build/bin/$BUILD_TARGET /usr/local/bin/server
-
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/local/bin/server"]
+ENTRYPOINT ["/bin/server"]
