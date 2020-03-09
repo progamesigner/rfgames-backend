@@ -28,6 +28,14 @@ where
         .await
 }
 
+async fn healthz() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().finish())
+}
+
+async fn statusz() -> Result<HttpResponse, Error> {
+    Ok(HttpResponse::Ok().finish())
+}
+
 pub fn serve<T>() -> io::Result<()>
 where
     T: DeserializeOwned + Form + 'static,
@@ -38,6 +46,8 @@ where
     System::new("serve").block_on(async move {
         HttpServer::new(move || {
             App::new()
+                .route("/healthz", web::to(healthz))
+                .route("/statusz", web::to(statusz))
                 .route("*", web::to(handle::<T>))
                 .wrap(Logger::default())
         })
