@@ -1,14 +1,15 @@
 use {
     super::{id, Form},
+    actix_rt::System,
     actix_web::{
         client::Client, http::Uri, middleware::Logger, web, App, Error, HttpResponse, HttpServer,
     },
-    futures::future::Future,
+    futures::future::FutureExt,
     serde::de::DeserializeOwned,
     std::{env, io},
 };
 
-fn handle<T>(body: web::Json<T>) -> impl Future<Item = HttpResponse, Error = Error>
+async fn handle<T>(body: web::Json<T>) -> Result<HttpResponse, Error>
 where
     T: DeserializeOwned + Form + 'static,
 {
@@ -24,6 +25,7 @@ where
                 HttpResponse::InternalServerError().finish()
             }
         })
+        .await
 }
 
 pub fn serve<T>() -> io::Result<()>
@@ -33,11 +35,14 @@ where
     let addr = env::var("SERVER_LISTEN_ADDR").unwrap_or("127.0.0.1".into());
     let port = env::var("SERVER_LISTEN_PORT").unwrap_or("3000".into());
 
-    HttpServer::new(move || {
-        App::new()
-            .route("*", web::to_async(handle::<T>))
-            .wrap(Logger::default())
+    System::new("serve").block_on(async move {
+        HttpServer::new(move || {
+            App::new()
+                .route("*", web::to(handle::<T>))
+                .wrap(Logger::default())
+        })
+        .bind(format!("{}:{}", addr, port))?
+        .run()
+        .await
     })
-    .bind(format!("{}:{}", addr, port))?
-    .run()
 }
