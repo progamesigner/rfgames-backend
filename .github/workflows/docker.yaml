@@ -54,7 +54,7 @@ jobs:
         add_git_labels: true
         build_args: BUILD_TARGET=contact
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-apply-api-server
+        repository: progamesigner/rfgames-contact-api-server
         tags: ${{ env.IMAGE_TAG }}
         username: ${{ secrets.DOCKER_USERNAME }}
       if: "contains(github.ref, 'refs/tags/v')"
