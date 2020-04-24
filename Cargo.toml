@@ -1,6 +1,6 @@
 [package]
 name = "rfgames-api-backend"
-version = "1.4.0"
+version = "1.4.1"
 authors = ["Yang Sheng Han <progamesigner@gmail.com>"]
 edition = "2018"
 

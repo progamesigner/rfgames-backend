@@ -1085,7 +1085,7 @@ dependencies = [
 
 [[package]]
 name = "rfgames-api-backend"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "actix-rt 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "actix-web 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
