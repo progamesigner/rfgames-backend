@@ -13,7 +13,11 @@ jobs:
     name: Publish to DockerHub
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+    - name: Tag
+      run: |
+        echo "::set-env name=IMAGE_TAG::$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//g')"
+      if: "contains(github.ref, 'refs/tags/v')"
     - name: Publish "apply-api-server" to DockerHub (latest)
       uses: docker/build-push-action@v1
       with:
@@ -31,7 +35,7 @@ jobs:
         build_args: BUILD_TARGET=apply
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: progamesigner/rfgames-apply-api-server
-        tags: latest
+        tags: ${{ env.IMAGE_TAG }}
         username: ${{ secrets.DOCKER_USERNAME }}
       if: "contains(github.ref, 'refs/tags/v')"
     - name: Publish "contact-api-server" to DockerHub (latest)
@@ -41,7 +45,7 @@ jobs:
         build_args: BUILD_TARGET=contact
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: progamesigner/rfgames-contact-api-server
-        tag_with_ref: true
+        tags: latest
         username: ${{ secrets.DOCKER_USERNAME }}
       if: "!contains(github.ref, 'refs/tags/v')"
     - name: Publish "contact-api-server" to DockerHub
@@ -49,8 +53,8 @@ jobs:
       with:
         add_git_labels: true
         build_args: BUILD_TARGET=contact
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-contact-api-server
-        tag_with_ref: true
+        password: ${{ secrets.contact }}
+        repository: progamesigner/rfgames-apply-api-server
+        tags: ${{ env.IMAGE_TAG }}
         username: ${{ secrets.DOCKER_USERNAME }}
       if: "contains(github.ref, 'refs/tags/v')"
