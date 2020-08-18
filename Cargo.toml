@@ -3,6 +3,7 @@ name = "rfgames-api-backend"
 version = "1.4.1"
 authors = ["Yang Sheng Han <progamesigner@gmail.com>"]
 edition = "2018"
+license = "MIT"
 
 [dependencies]
 actix-rt = "1.0"
