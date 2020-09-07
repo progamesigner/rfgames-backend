@@ -34,7 +34,7 @@ LABEL org.opencontainers.image.description "High performance RFGames API backend
 LABEL org.opencontainers.image.documentation "https://github.com/progamesigner/rfgames-backend"
 LABEL org.opencontainers.image.title "progamesigner/rfgames-backend"
 LABEL org.opencontainers.image.url "https://github.com/progamesigner/rfgames-backend"
-LABEL org.opencontainers.image.version "1.4.0"
+LABEL org.opencontainers.image.version "1.4.1"
 
 COPY --from=builder /etc/passwd /etc/group /etc/
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

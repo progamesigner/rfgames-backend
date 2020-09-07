@@ -1,4 +1,4 @@
-name: Build and publish to DockerHub
+name: Build and publish to GitHub Packages
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Publish to DockerHub
+    name: Publish to GitHub Packages
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -18,43 +18,47 @@ jobs:
       run: |
         echo "::set-env name=IMAGE_TAG::$(echo ${{ github.ref }} | sed -e 's/^refs\/tags\/v//g')"
       if: "contains(github.ref, 'refs/tags/v')"
-    - name: Publish "apply-api-server" to DockerHub (latest)
+    - name: Publish "apply-api-server" to GitHub Packages (latest)
       uses: docker/build-push-action@v1
       with:
         add_git_labels: true
         build_args: BUILD_TARGET=apply
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-apply-api-server
+        password: ${{ github.token }}
+        registry: docker.pkg.github.com
+        repository: ${{ github.repository }}/rfgames-apply-api-server
         tags: latest
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: ${{ github.actor }}
       if: "!contains(github.ref, 'refs/tags/v')"
-    - name: Publish "apply-api-server" to DockerHub
+    - name: Publish "apply-api-server" to GitHub Packages
       uses: docker/build-push-action@v1
       with:
         add_git_labels: true
         build_args: BUILD_TARGET=apply
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-apply-api-server
+        password: ${{ github.token }}
+        registry: docker.pkg.github.com
+        repository: ${{ github.repository }}/rfgames-apply-api-server
         tags: ${{ env.IMAGE_TAG }}
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: ${{ github.actor }}
       if: "contains(github.ref, 'refs/tags/v')"
-    - name: Publish "contact-api-server" to DockerHub (latest)
+    - name: Publish "contact-api-server" to GitHub Packages (latest)
       uses: docker/build-push-action@v1
       with:
         add_git_labels: true
         build_args: BUILD_TARGET=contact
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-contact-api-server
+        password: ${{ github.token }}
+        registry: docker.pkg.github.com
+        repository: ${{ github.repository }}/rfgames-contact-api-server
         tags: latest
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: ${{ github.actor }}
       if: "!contains(github.ref, 'refs/tags/v')"
-    - name: Publish "contact-api-server" to DockerHub
+    - name: Publish "contact-api-server" to GitHub Packages
       uses: docker/build-push-action@v1
       with:
         add_git_labels: true
         build_args: BUILD_TARGET=contact
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: progamesigner/rfgames-contact-api-server
+        password: ${{ github.token }}
+        registry: docker.pkg.github.com
+        repository: ${{ github.repository }}/rfgames-contact-api-server
         tags: ${{ env.IMAGE_TAG }}
-        username: ${{ secrets.DOCKER_USERNAME }}
+        username: ${{ github.actor }}
       if: "contains(github.ref, 'refs/tags/v')"
