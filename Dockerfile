@@ -2,23 +2,23 @@ FROM rust:1.48 AS builder
 
 WORKDIR /build
 
-RUN apt-get update && \
-    apt-get install -y musl-tools && \
-    rm -rf /var/lib/apt/lists/* && \
-    rustup target add x86_64-unknown-linux-musl
+RUN apt-get update \
+ && apt-get install -y musl-tools \
+ && rm -rf /var/lib/apt/lists/* \
+ && rustup target add x86_64-unknown-linux-musl
 
 COPY Cargo.* ./
 
 RUN mkdir src \
-    && echo "fn main() {}" > src/main.rs \
-    && cargo build --target x86_64-unknown-linux-musl --release && \
-    rm src/*.rs
+ && echo "fn main() {}" > src/main.rs \
+ && cargo build --target x86_64-unknown-linux-musl --release \
+ && rm src/*.rs
 
 COPY src/ ./src/
 
-RUN touch src/*.rs && \
-    export PATH=$PWD/bin:$PATH && \
-    cargo install \
+RUN touch src/*.rs \
+ && export PATH=$PWD/bin:$PATH \
+ && cargo install \
         --target x86_64-unknown-linux-musl \
         --root $PWD \
         --path $PWD
