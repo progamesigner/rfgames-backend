@@ -1,10 +1,8 @@
 use {
     super::{id, Form},
     actix_rt::System,
-    actix_web::{
-        client::Client, http::Uri, middleware::Logger, web, App, Error, HttpResponse, HttpServer,
-    },
-    futures::future::FutureExt,
+    actix_web::{http::Uri, middleware::Logger, web, App, Error, HttpResponse, HttpServer},
+    awc::Client,
     serde::de::DeserializeOwned,
     std::{env, io},
 };
@@ -15,17 +13,20 @@ where
 {
     let webhook = T::webhook().parse::<Uri>().expect("Invalid webhook URL.");
 
-    Client::default()
+    let client = Client::default();
+
+    let response = client
         .post(webhook)
         .send_json(&body.into_payload(&id::next(&T::prefix())))
-        .then(|response| match response {
-            Ok(_) => HttpResponse::NoContent().finish(),
-            Err(error) => {
-                println!("{}", error.to_string());
-                HttpResponse::InternalServerError().finish()
-            }
-        })
-        .await
+        .await;
+
+    match response {
+        Ok(_) => Ok(HttpResponse::NoContent().finish()),
+        Err(error) => {
+            println!("{}", error.to_string());
+            Ok(HttpResponse::InternalServerError().finish())
+        }
+    }
 }
 
 async fn healthz() -> Result<HttpResponse, Error> {
@@ -43,7 +44,7 @@ where
     let addr = env::var("SERVER_LISTEN_ADDR").unwrap_or("127.0.0.1".into());
     let port = env::var("SERVER_LISTEN_PORT").unwrap_or("3000".into());
 
-    System::new("serve").block_on(async move {
+    System::new().block_on(async move {
         HttpServer::new(move || {
             App::new()
                 .route("/healthz", web::to(healthz))
