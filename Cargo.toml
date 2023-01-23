@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-actix-rt = "2.7"
+actix-rt = "2.8"
 actix-web = { version = "4.2", features = ["rustls"] }
 awc = "3.0.1"
 chrono = "0.4"
