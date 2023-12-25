@@ -8,7 +8,7 @@ license = "MIT"
 [dependencies]
 actix-rt = "2.9"
 actix-web = { version = "4.4", features = ["rustls"] }
-awc = "3.2.0"
+awc = "3.3.0"
 chrono = "0.4"
 env_logger = "0.10"
 futures = "0.3"
