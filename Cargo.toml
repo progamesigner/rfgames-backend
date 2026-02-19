@@ -7,7 +7,7 @@ license = "MIT"
 
 [dependencies]
 actix-rt = "2.11"
-actix-web = { version = "4.12", features = ["rustls"] }
+actix-web = { version = "4.13", features = ["rustls"] }
 awc = "3.8.1"
 chrono = "0.4"
 env_logger = "0.11"
