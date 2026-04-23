@@ -1444,7 +1444,7 @@ dependencies = [
  "futures",
  "http 1.4.0",
  "lazy_static",
- "rand 0.9.4",
+ "rand 0.10.1",
  "regex",
  "serde",
  "serde_json",
